@@ -9,6 +9,8 @@ import com.app.inven.pojo.InwardEntry;
 import com.app.inven.pojo.Product;
 import com.app.inven.pojo.PurchaseOrder;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -18,12 +20,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class InwardEntryServiceImpl implements InwardEntryService {
 
+    private final Logger logger = LoggerFactory.getLogger(InwardEntryServiceImpl.class); // Added logging
     private final InwardEntryRepository inwardEntryRepository;
     private final PurchaseOrderRepository purchaseOrderRepository;
     private final ProductRepository productRepository;
 
     @Override
     public InwardEntry addEntry(Long orderId, InwardEntryDTO dto) {
+        logger.info("Adding inward entry for order ID: {} and product ID: {}", orderId, dto.getProductId());
+
         PurchaseOrder order = purchaseOrderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
 
@@ -41,6 +46,7 @@ public class InwardEntryServiceImpl implements InwardEntryService {
 
     @Override
     public List<InwardEntry> getEntriesByProduct(Long productId) {
+        logger.info("Fetching inward entries by product ID: {}", productId);
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
         return inwardEntryRepository.findByProduct(product);
@@ -48,6 +54,7 @@ public class InwardEntryServiceImpl implements InwardEntryService {
 
     @Override
     public List<InwardEntry> getEntriesByOrder(Long orderId) {
+        logger.info("Fetching inward entries by order ID: {}", orderId);
         PurchaseOrder order = purchaseOrderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
         return inwardEntryRepository.findByPurchaseOrder(order);
