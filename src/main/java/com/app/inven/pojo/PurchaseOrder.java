@@ -1,5 +1,6 @@
 package com.app.inven.pojo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -32,6 +33,8 @@ public class PurchaseOrder {
     @Column(name = "status")
     private String status; // e.g., PENDING, RECEIVED
 
+    @JsonIgnore
     @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL)
     private List<InwardEntry> inwardEntries;
+
 }
