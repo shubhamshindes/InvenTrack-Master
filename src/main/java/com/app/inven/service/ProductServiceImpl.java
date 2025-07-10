@@ -56,7 +56,7 @@ public class ProductServiceImpl implements ProductService {
 		existing.setImageUrl(dto.getImageUrl());
 
 		Supplier supplier = supplierService.getById(dto.getSupplierId());
-				
+		existing.setSupplier(supplier);
 		return productRepository.save(existing);
 	}
 
