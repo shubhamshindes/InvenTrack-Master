@@ -42,6 +42,10 @@ public class Stock {
     @Column(name = "last_updated")
     private LocalDateTime lastUpdated;
 
+    public void addQuantity(Integer qty) {
+        this.quantity += qty;
+        this.lastUpdated = LocalDateTime.now();
+    }
 
 
 

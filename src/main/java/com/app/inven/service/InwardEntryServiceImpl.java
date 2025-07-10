@@ -4,10 +4,12 @@ import com.app.inven.DTO.InwardEntryDTO;
 import com.app.inven.dao.InwardEntryRepository;
 import com.app.inven.dao.ProductRepository;
 import com.app.inven.dao.PurchaseOrderRepository;
+import com.app.inven.dao.StockRepository;
 import com.app.inven.exception.ResourceNotFoundException;
 import com.app.inven.pojo.InwardEntry;
 import com.app.inven.pojo.Product;
 import com.app.inven.pojo.PurchaseOrder;
+import com.app.inven.pojo.Stock;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +26,7 @@ public class InwardEntryServiceImpl implements InwardEntryService {
     private final InwardEntryRepository inwardEntryRepository;
     private final PurchaseOrderRepository purchaseOrderRepository;
     private final ProductRepository productRepository;
+    private final StockRepository stockRepository;
 
     @Override
     public InwardEntry addEntry(Long orderId, InwardEntryDTO dto) {
@@ -41,7 +44,15 @@ public class InwardEntryServiceImpl implements InwardEntryService {
         entry.setQuantity(dto.getQuantity());
         entry.setReceivedDate(LocalDate.now());
 
+        // 🔁 Update stock after inward
+        Stock stock = stockRepository.findByProduct(product)
+                .orElseThrow(() -> new ResourceNotFoundException("Stock not found for product: " + product.getProductName()));
+
+        stock.addQuantity(dto.getQuantity()); // Update quantity & timestamp
+        stockRepository.save(stock); // Persist updated stock
+
         return inwardEntryRepository.save(entry);
+
     }
 
     @Override
