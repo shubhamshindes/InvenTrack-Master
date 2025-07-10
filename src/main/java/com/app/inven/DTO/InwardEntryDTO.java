@@ -10,9 +10,7 @@ public class InwardEntryDTO {
     private Long entryId;
     private Long orderId;
     private Long productId;
+    private Long shelfId;  // New field to specify target shelf
     private Integer quantity;
     private LocalDate receivedDate;
-
-
-
 }

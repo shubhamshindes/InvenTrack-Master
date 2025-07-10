@@ -42,17 +42,25 @@ public class InwardEntryServiceImpl implements InwardEntryService {
         entry.setPurchaseOrder(order);
         entry.setProduct(product);
         entry.setQuantity(dto.getQuantity());
-        entry.setReceivedDate(LocalDate.now());
+        entry.setReceivedDate(dto.getReceivedDate() != null ? dto.getReceivedDate() : LocalDate.now());
 
-        // 🔁 Update stock after inward
-        Stock stock = stockRepository.findByProduct(product)
-                .orElseThrow(() -> new ResourceNotFoundException("Stock not found for product: " + product.getProductName()));
+        // 🔁 Update stock after inward - now handling multiple stock entries
+        List<Stock> stocks = stockRepository.findByProduct(product);
 
-        stock.addQuantity(dto.getQuantity()); // Update quantity & timestamp
-        stockRepository.save(stock); // Persist updated stock
+        if (stocks.isEmpty()) {
+            throw new ResourceNotFoundException("No stock entries found for product: " + product.getProductName());
+        }
+
+        // Business logic decision needed here:
+        // Option 1: Update first stock entry (simple approach)
+        Stock stockToUpdate = stocks.get(0);
+        stockToUpdate.addQuantity(dto.getQuantity());
+        stockRepository.save(stockToUpdate);
+
+        // OR Option 2: Distribute quantity across multiple stock entries
+        // distributeQuantityAcrossStocks(stocks, dto.getQuantity());
 
         return inwardEntryRepository.save(entry);
-
     }
 
     @Override

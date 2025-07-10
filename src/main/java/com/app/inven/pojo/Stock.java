@@ -36,6 +36,10 @@ public class Stock {
     @JsonIgnore
     private Shelf shelf;
 
+    @Column(name = "min_threshold")
+    private Integer minThreshold = 10; // default minimum threshold
+
+
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
@@ -47,6 +51,8 @@ public class Stock {
         this.lastUpdated = LocalDateTime.now();
     }
 
-
+    public boolean needsReorder() {
+        return quantity <= minThreshold;
+    }
 
 }
