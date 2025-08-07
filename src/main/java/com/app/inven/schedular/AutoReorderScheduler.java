@@ -25,7 +25,7 @@ public class AutoReorderScheduler {
         List<Stock> lowStocks = stockRepository.findAll()
                 .stream()
                 .filter(Stock::needsReorder)
-                .collect(Collectors.toList());
+                .toList();
 
         lowStocks.forEach(stock -> logger.warn("Low stock alert: Product ID {} has only {} units left.",
                 stock.getProduct().getProductId(), stock.getQuantity()));
