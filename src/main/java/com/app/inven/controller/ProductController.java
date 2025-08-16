@@ -3,6 +3,10 @@ package com.app.inven.controller;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.app.inven.DTO.ProductReorderConfigDTO;
+import com.app.inven.dao.ProductRepository;
+import com.app.inven.exception.ResourceNotFoundException;
+import com.app.inven.service.*;
 import jakarta.transaction.Transactional;
 import org.hibernate.Hibernate;
 import org.springframework.http.HttpStatus;
@@ -14,10 +18,6 @@ import com.app.inven.pojo.Product;
 import com.app.inven.pojo.Shelf;
 import com.app.inven.pojo.Stock;
 import com.app.inven.pojo.Supplier;
-import com.app.inven.service.ProductService;
-import com.app.inven.service.ShelfService;
-import com.app.inven.service.StockService;
-import com.app.inven.service.SupplierService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,7 +30,8 @@ public class ProductController {
 	private final SupplierService supplierService;
 	private final ShelfService shelfService;
 	private final StockService stockService;
-
+	private final ProductRepository productRepository;
+	private final AutoReorderService autoReorderService;
 	// Create Product with Supplier and Initial Stock
 	@PostMapping
 	public ResponseEntity<Product> createProduct(@RequestBody ProductRequestDTO productDTO) {
@@ -100,5 +101,29 @@ public class ProductController {
 	@GetMapping("/{productId}/stocks")
 	public ResponseEntity<List<Stock>> getStockByProduct(@PathVariable Long productId) {
 		return ResponseEntity.ok(stockService.getStockByProductId(productId));
+	}
+
+	@PutMapping("/reorder-config")
+	public ResponseEntity<Product> updateReorderConfig(
+			@RequestBody ProductReorderConfigDTO config) {
+		Product product = productRepository.findById(config.getProductId())
+				.orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+
+		product.setReorderThreshold(config.getReorderThreshold());
+		product.setReorderQuantity(config.getReorderQuantity());
+		product.setIsAutoReorder(config.getIsAutoReorder());
+
+		return ResponseEntity.ok(productRepository.save(product));
+	}
+
+	@GetMapping("/needing-reorder")
+	public ResponseEntity<List<Product>> getProductsNeedingReorder() {
+		return ResponseEntity.ok(productRepository.findProductsNeedingReorder());
+	}
+
+	@PostMapping("/trigger-reorder")
+	public ResponseEntity<String> manualTriggerReorder() {
+		autoReorderService.processAutoReorder();
+		return ResponseEntity.ok("Manual reorder triggered");
 	}
 }

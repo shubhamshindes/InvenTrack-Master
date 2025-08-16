@@ -60,7 +60,14 @@ public class Product {
 	@JsonIgnore  // Breaks the circular reference
     private List<Stock> stocks;
 
-    
+    @Column(name = "reorder_threshold")
+    private Integer reorderThreshold = 10; // Default value
+
+    @Column(name = "reorder_quantity")
+    private Integer reorderQuantity = 50; // Default value
+
+    @Column(name = "is_auto_reorder")
+    private Boolean isAutoReorder = true;
     
 
  
